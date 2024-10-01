@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .canvas-container {
+      display: inline-block;
+      margin: 10px;
+      vertical-align: top;
+    }
+    canvas {
+      border: 1px solid #ccc;
+    }
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      cursor: pointer;
+    }
+    .wrapper {
+      white-space: nowrap;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="canvas-container">
+      <h3>1. Colorful Particles</h3>
+      <canvas id="particleCanvas" width="300" height="200"></canvas>
+    </div>
+    
+    <div class="canvas-container">
+      <h3>2. Gradient Rainbow</h3>
+      <canvas id="gradientCanvas" width="300" height="200"></canvas>
+    </div>
+    
+    <div class="canvas-container">
+      <h3>3. Interactive Drawing</h3>
+      <canvas id="drawCanvas" width="300" height="200"></canvas>
+      <br>
+      <button onclick="clearCanvas()">Clear Canvas</button>
+    </div>
+  </div>
+
+  <script>
+    // Particles
+    const particleCanvas = document.getElementById('particleCanvas');
+    const particleCtx = particleCanvas.getContext('2d');
+    const particles = [];
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * particleCanvas.width;
+        this.y = Math.random() * particleCanvas.height;
+        this.vx = (Math.random() - 0.5) * 2;
+        this.vy = (Math.random() - 0.5) * 2;
+        this.radius = Math.random() * 3 + 1;
+        this.color = `hsl(${Math.random() * 360}, 70%, 50%)`;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if (this.x < 0 || this.x > particleCanvas.width) this.vx *= -1;
+        if (this.y < 0 || this.y > particleCanvas.height) this.vy *= -1;
+      }
+
+      draw() {
+        particleCtx.beginPath();
+        particleCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        particleCtx.fillStyle = this.color;
+        particleCtx.fill();
+      }
+    }
+
+    for (let i = 0; i < 50; i++) {
+      particles.push(new Particle());
+    }
+
+    function animateParticles() {
+      particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+      particles.forEach(particle => {
+        particle.update();
+        particle.draw();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // Gradient Rainbow
+    const gradientCanvas = document.getElementById('gradientCanvas');
+    const gradientCtx = gradientCanvas.getContext('2d');
+    
+    const gradient = gradientCtx.createLinearGradient(0, 0, gradientCanvas.width, 0);
+    gradient.addColorStop(0, 'red');
+    gradient.addColorStop(0.17, 'orange');
+    gradient.addColorStop(0.34, 'yellow');
+    gradient.addColorStop(0.51, 'green');
+    gradient.addColorStop(0.68, 'blue');
+    gradient.addColorStop(0.85, 'indigo');
+    gradient.addColorStop(1, 'violet');
+
+    gradientCtx.fillStyle = gradient;
+    gradientCtx.fillRect(0, 0, gradientCanvas.width, gradientCanvas.height);
+
+    // Interactive Drawing
+    const drawCanvas = document.getElementById('drawCanvas');
+    const drawCtx = drawCanvas.getContext('2d');
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+    let hue = 0;
+
+    drawCanvas.addEventListener('mousedown', startDrawing);
+    drawCanvas.addEventListener('mousemove', draw);
+    drawCanvas.addEventListener('mouseup', () => isDrawing = false);
+    drawCanvas.addEventListener('mouseout', () => isDrawing = false);
+
+    function startDrawing(e) {
+      isDrawing = true;
+      [lastX, lastY] = [e.offsetX, e.offsetY];
+    }
+
+    function draw(e) {
+      if (!isDrawing) return;
+      
+      drawCtx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+      drawCtx.lineWidth = 5;
+      drawCtx.lineCap = 'round';
+      drawCtx.beginPath();
+      drawCtx.moveTo(lastX, lastY);
+      drawCtx.lineTo(e.offsetX, e.offsetY);
+      drawCtx.stroke();
+      
+      [lastX, lastY] = [e.offsetX, e.offsetY];
+      hue = (hue + 1) % 360;
+    }
+
+    function clearCanvas() {
+      drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+    }
+  </script>
+</body>
+</html>
